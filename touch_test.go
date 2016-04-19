@@ -19,12 +19,18 @@ func TestTouch(t *testing.T) {
 	server := httptest.NewServer(h)
 	defer server.Close()
 
-	resp, err := http.Get(server.URL)
-	if err != nil {
-		t.Fail()
-	}
+	for i := 0; i < 1000; i++ {
+		resp, err := http.Get(server.URL)
+		if err != nil {
+			t.Fail()
+		}
 
-	if resp.StatusCode != 200 {
-		t.Fail()
+		if resp.StatusCode != 200 {
+			t.Fail()
+		}
+
+		if p.count() != i+1 {
+			t.Fail()
+		}
 	}
 }
