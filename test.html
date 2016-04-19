@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Test</title>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script type="text/javascript">
+  $(function() {
+    if (window["WebSocket"]) {
+      conn = new WebSocket("ws://{{$}}/listen");
+        conn.onclose = function(evt) {
+          console.log("Connection closed.");
+        }
+        conn.onmessage = function(evt) {
+          console.log(evt);
+        }
+    }
+  });
+</script>
+</head>
+<body>
+  <h1>Open Console</h1>
+</body>
+</html>
