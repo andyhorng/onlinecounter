@@ -5,4 +5,3 @@ Online Visitor Counter
 
 * /touch
 * /listen
-* /current
