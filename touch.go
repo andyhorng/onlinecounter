@@ -33,5 +33,7 @@ func handleTouch(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprint(w, strconv.Itoa(p.count()))
 
+	log.Printf("touched: %s\n", cid.Value)
+
 	return
 }

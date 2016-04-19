@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"html/template"
+	"log"
 	"net/http"
 	"sync"
+	"time"
 )
 
 const counterId = "counter_id"
@@ -19,9 +21,8 @@ type visitor struct {
 var testTempl = template.Must(template.ParseFiles("test.html"))
 
 type pool struct {
-	visitors      map[string]*visitor
-	lock          *sync.Mutex
-	eventChannels []chan *visitor
+	visitors map[string]*visitor
+	lock     *sync.Mutex
 }
 
 var p = pool{
@@ -50,6 +51,29 @@ func (p pool) count() int {
 	return len(p.visitors)
 }
 
+func (p pool) clean() {
+	ticker := time.Tick(1 * time.Minute)
+
+	for now := range ticker {
+		log.Println("start clean")
+
+		p.lock.Lock()
+		expire := now.Add(-30 * time.Minute)
+
+		for _, v := range p.visitors {
+			log.Printf("%d %d\n", v.lastTouched, expire.Unix())
+			if v.lastTouched < expire.Unix() {
+				delete(p.visitors, v.id)
+
+				log.Printf("delete: %s\n", v.id)
+			}
+		}
+		p.lock.Unlock()
+		log.Println("done clean")
+	}
+
+}
+
 func handleTest(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", 405)
@@ -65,6 +89,8 @@ func main() {
 	http.HandleFunc("/touch", handleTouch)
 	http.HandleFunc("/listen", handleListen)
 	http.HandleFunc("/test", handleTest)
+
+	go p.clean()
 
 	http.ListenAndServe(*addr, nil)
 }
