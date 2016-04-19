@@ -30,7 +30,7 @@ var p = pool{
 	lock:     &sync.Mutex{},
 }
 
-func (p pool) addVisitor(v *visitor) {
+func (p pool) addVisitor(v *visitor) int {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.visitors[v.id] = v
@@ -39,9 +39,13 @@ func (p pool) addVisitor(v *visitor) {
 	defer connectionsLock.Unlock()
 
 	for c, _ := range connections {
-		c.ch <- true
+		select {
+		case c.ch <- true:
+		default:
+		}
 	}
 
+	return len(p.visitors)
 }
 
 func (p pool) count() int {

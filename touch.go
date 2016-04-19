@@ -29,9 +29,7 @@ func handleTouch(w http.ResponseWriter, r *http.Request) {
 		lastTouched: time.Now().Unix(),
 	}
 
-	p.addVisitor(v)
-
-	fmt.Fprint(w, strconv.Itoa(p.count()))
+	fmt.Fprint(w, strconv.Itoa(p.addVisitor(v)))
 
 	log.Printf("touched: %s\n", cid.Value)
 
